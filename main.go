@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -47,6 +48,25 @@ func main() {
 	CheckError(err)
 
 	fmt.Println("Connected!")
+
+	// QUERY
+	rows, err := db.Query(`SELECT * from salaries where salary > 50000 limit 10`)
+	CheckError(err)
+
+	defer rows.Close()
+	for rows.Next() {
+		var emp_no int
+		var salary string
+		var from_date string
+		var to_date string
+
+		err = rows.Scan(&salary, &emp_no, &from_date, &to_date)
+		CheckError(err)
+		layout := "2006-01-02T15:04:05Z0700"
+		updatedAt, _ := time.Parse(layout, from_date)
+		fmt.Println(salary, emp_no, updatedAt, to_date)
+	}
+	CheckError(err)
 }
 
 func CheckError(err error) {
